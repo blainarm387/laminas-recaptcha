@@ -27,7 +27,7 @@ class ReCaptchaTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->siteKey   = getenv('TESTS_LAMINAS_SERVICE_RECAPTCHA_SITE_KEY');
+        $this->siteKey = getenv('TESTS_LAMINAS_SERVICE_RECAPTCHA_SITE_KEY');
         $this->secretKey = getenv('TESTS_LAMINAS_SERVICE_RECAPTCHA_SECRET_KEY');
 
         if (empty($this->siteKey) || empty($this->siteKey)) {
@@ -62,7 +62,7 @@ class ReCaptchaTest extends TestCase
 
     public function testSingleParam(): void
     {
-        $key   = 'ssl';
+        $key = 'ssl';
         $value = true;
 
         $this->reCaptcha->setParam($key, $value);
@@ -88,7 +88,7 @@ class ReCaptchaTest extends TestCase
 
     public function testSingleOption(): void
     {
-        $key   = 'theme';
+        $key = 'theme';
         $value = 'dark';
 
         $this->reCaptcha->setOption($key, $value);
@@ -104,7 +104,7 @@ class ReCaptchaTest extends TestCase
     {
         $options = [
             'theme' => 'dark',
-            'hl'    => 'en',
+            'hl' => 'en',
         ];
 
         $this->reCaptcha->setOptions($options);
@@ -139,7 +139,7 @@ class ReCaptchaTest extends TestCase
     {
         $options = [
             'theme' => 'dark',
-            'hl'    => 'en',
+            'hl' => 'en',
         ];
 
         $config = new Config\Config($options);
@@ -166,14 +166,14 @@ class ReCaptchaTest extends TestCase
 
         $options = [
             'theme' => 'dark',
-            'hl'    => 'en',
+            'hl' => 'en',
         ];
 
         $ip = '127.0.0.1';
 
         $reCaptcha = new ReCaptcha($this->siteKey, $this->secretKey, $params, $options, $ip);
 
-        $receivedParams  = $reCaptcha->getParams();
+        $receivedParams = $reCaptcha->getParams();
         $receivedOptions = $reCaptcha->getOptions();
 
         static::assertSame($this->siteKey, $reCaptcha->getSiteKey());
@@ -210,7 +210,7 @@ class ReCaptchaTest extends TestCase
         $this->reCaptcha->setIp('127.0.0.1');
 
         $adapter = new Test();
-        $client  = new HttpClient(null, [
+        $client = new HttpClient(null, [
             'adapter' => $adapter,
         ]);
 
@@ -220,7 +220,7 @@ class ReCaptchaTest extends TestCase
 
         // See if we have a valid object and that the status is false
         static::assertInstanceOf(ReCaptchaResponse::class, $resp);
-        static::assertFalse($resp->getStatus());
+        static::assertFalse($resp->getIsSuccess());
     }
 
     public function testGetHtml(): void
