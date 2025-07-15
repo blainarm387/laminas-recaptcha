@@ -21,7 +21,7 @@ final class ReCaptcha implements ReCaptchaServiceInterface
 
     private string $ip;
 
-    public string $action;
+    private string $action;
 
     public function __construct(
         private readonly string $siteKey,
@@ -132,5 +132,10 @@ HTML;
     public function setIp(string $ip): void
     {
         $this->ip = $ip;
+    }
+
+    public function setAction(string $action): void
+    {
+        $this->action = $action;
     }
 }
