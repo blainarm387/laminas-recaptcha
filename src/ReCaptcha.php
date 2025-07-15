@@ -15,12 +15,18 @@ final class ReCaptcha implements ReCaptchaServiceInterface
 
     public const VERIFY_SERVER = 'https://www.google.com/recaptcha/api/siteverify';
 
-    private static bool $is_rendered = false;
+    public const DEFAULT_MIN_SCORE_THRESHOLD = 0.5;
+
+    private static bool $isRendered = false;
+
+    private string $ip;
+
+    public string $action;
 
     public function __construct(
         private readonly string $siteKey,
         private readonly string $secretKey,
-        private readonly string $ip,
+        private readonly float $minScoreThreshold = self::DEFAULT_MIN_SCORE_THRESHOLD,
         private readonly Client $client = new Client()
     ) {
     }
@@ -34,11 +40,11 @@ final class ReCaptcha implements ReCaptchaServiceInterface
      */
     public function getHtml(): string
     {
-        if (self::$is_rendered) {
+        if (self::$isRendered) {
             return '';
         }
 
-        self::$is_rendered = true;
+        self::$isRendered = true;
 
         return <<<HTML
 <script>
@@ -81,15 +87,6 @@ HTML;
 
     public function verify(string $responseField): Response
     {
-        if ($this->secretKey === null) {
-            throw new Exception('Missing secret key');
-        }
-
-        if ($this->ip === null) {
-            throw new Exception('Missing ip address');
-        }
-
-
         $response = $this
             ->client
             ->post(
@@ -102,6 +99,38 @@ HTML;
                     ],
                 ]
             );
-        return new Response($response);
+
+        $body = (string)$response->getBody();
+        $parts = trim($body) === '' ? [] : json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+
+        $isValid = false;
+        $errorCodes = [];
+
+        if (is_array($parts) && array_key_exists('success', $parts)) {
+            $isValid = $this->isValid($parts);
+            if (array_key_exists('error-codes', $parts)) {
+                $errorCodes = $parts['error-codes'];
+            }
+        }
+
+        return new Response($isValid, $errorCodes);
+    }
+
+    private function isValid(array $parts)
+    {
+        if ($parts['success'] !== true) {
+            return false;
+        }
+
+        if ($parts['action'] ?? null !== $this->action) {
+            return false;
+        }
+
+        return $parts['score'] ?? 0 >= $this->minScoreThreshold;
+    }
+
+    public function setIp(string $ip): void
+    {
+        $this->ip = $ip;
     }
 }
