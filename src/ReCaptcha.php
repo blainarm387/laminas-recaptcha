@@ -19,13 +19,12 @@ final class ReCaptcha implements ReCaptchaServiceInterface
 
     private static bool $isRendered = false;
 
-    private string $ip;
-
     private string $action;
 
     public function __construct(
         private readonly string $siteKey,
         private readonly string $secretKey,
+        private readonly string $ip,
         private readonly float $minScoreThreshold = self::DEFAULT_MIN_SCORE_THRESHOLD,
         private readonly Client $client = new Client()
     ) {
@@ -127,11 +126,6 @@ HTML;
         }
 
         return $parts['score'] ?? 0 >= $this->minScoreThreshold;
-    }
-
-    public function setIp(string $ip): void
-    {
-        $this->ip = $ip;
     }
 
     public function setAction(string $action): void
